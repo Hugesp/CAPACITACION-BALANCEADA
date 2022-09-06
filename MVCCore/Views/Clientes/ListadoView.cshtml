@@ -1,0 +1,138 @@
+﻿@{
+    ViewData["Title"] = "Clientes";
+}
+<div class="row">
+    <div class="col s10 offset-s1">
+        <div class="card material-table">
+
+            <div class="row valign-wrapper">
+                <div class="col s6">
+                    <span class="table-title">Clientes</span>
+                </div>
+                <div class="col s6">
+                    <a id="btnAdd" onclick="AddEdit(0)" class="btn-floating waves-effect waves-light blue"> <i class="material-icons">add</i></a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col s12">
+                    <table id="tblModel" class="mdl-data-table highlight" style="width:100%">
+                        <thead>
+                            <tr>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="addEditModal" class="modal">
+    <div class="modal-content">
+        <h4 id="modalTitle"></h4>
+        <div class="modal-body" id="addEditBody"></div>
+        <p id="modalMensaje"></p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+        <a href="#!" id="btnSave" class="modal-close waves-effect waves-green btn-flat red">Guardar</a>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h4 id="deleteTitle">Eliminar registro</h4>
+        <p id="deleteMensaje"></p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+        <a href="#!" id="btnDelete" class="modal-close waves-effect waves-green btn-flat red">Eliminar</a>
+    </div>
+</div>
+@*Section permite agregar código de razor y no solo script*@
+@section Scripts{
+    <script>
+        @*Codigo del lado del servidor @ViewData["Controller"]*@
+        var controller = '@ViewData["Controller"]';
+        var path = '@Url.Content("~")'//Ruta base
+        var uriList = `${path}/${controller}/ListadoAjax`;
+        var urlAddEdit = `${path}/${controller}/AddEdit/`;
+        var urlSave = `${path}/${controller}/Save/`
+
+        $(document).ready(function () {
+            $('#tblModel').dataTable({
+                processing: true,
+                filter: true,
+                ajax: {
+                    url:uriList, type:'GET', datatype: 'json', dataSrc: ""
+                },
+                columns: [
+                    {
+                        name: 'idCliente', data: 'idCliente', title: 'Id',
+                        sortable: false, searchable: false, visible: false
+                    },
+                    {
+                        name: 'nombre', data: 'nombre', title: 'Nombre',
+                        sortable: false, searchable: false
+                    },
+                    {
+                        name: 'apellidop', data: 'apellidop', title: 'Apellido Paterno',
+                        sortable: false, searchable: false
+                    },
+                    {
+                        name: 'apellidom', data: 'apellidom', title: 'Apellido Materno',
+                        sortable: false, searchable: false
+                    },
+                    {
+                        title: '<div class="text-center">Acciones</div>',
+                        sortable: false,
+                        render: function (data, type, row) {
+                            var edit = `<div class="center-align"><a class="btn-floating waves-effect waves-light btn-small boton " onclick="AddEdit('${row.idCliente}')"><i class="material-icons" style="pointer-events:none;">edit</i></a>`
+                            var del = `<a class="btn-floating waves-effect waves-light btn-small boton " onclick="DeleteAsync(event);" data-id="${row.idCliente}" data-element="'${row.nombre}'"><i class="material-icons" style="pointer-events:none;">delete_forever</i></a>`
+                           /*var boton = `<div class="text-center"><i></i></div><a id="${row.IdCliente}"></a>`;*/
+                            return edit + "&nbsp;&nbsp;" + del + '</div>';
+                            /*return boton;*/
+                        }
+                    }
+                ]
+            });
+            $('select').formSelect();
+        });
+
+        function ReloadTable() {//Ejecuta la funcion de Js para que se recargue la tabla
+            let table = $('#tblModel').DataTable();
+            table.ajax.reload();
+        }
+
+        var AddEdit = function (id) {
+            console.log(id);
+            var url = `${urlAddEdit}${id}`;
+
+            document.getElementById('modalTitle').innerText = id === 0 ? 'Agregar Cliente' : 'Editar Cliente';
+
+            $('#addEditBody').load(url, function () {
+                M.updateTextFields();
+                $(document).ready(function () {
+                    var currYear = (new Date()).getFullYear();
+                    $('.datepicker').datepicker();
+                    //$('.datepicker').datepicker({
+                    //    maxDate: new Date(currYear, 12, 31),
+                    //    yearRange: [1928, currYear],
+                    //    format: "dd/mm/yyyy"
+                    //});
+                });
+                $('#addEditModal').modal('open');
+            });
+
+        }
+
+        document.getElementById().addEventListener("click", function () {
+            var formData = new FormData(documen.getElementById('form'));
+
+            SaveAsync(urlSave, formData, ReloadTable);
+        });
+    </script>
+    <script src="~/js/deleteAsync.js" asp-append-version="true"></script>
+    <script src="~/js/saveAsync.js" asp-append-version="true"></script>
+}
